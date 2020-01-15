@@ -8,7 +8,8 @@ const router = express.Router();
 // POST requests
 router.post('/', validateUser, (req, res) => {
   // do your magic!
-  userDb.insert(req.body)
+  const body = req.body;
+  userDb.insert(body)
   .then(data => {
     res.status(201).json(data)
   })
@@ -22,16 +23,13 @@ router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
   // do your magic!
   const id = req.params.id;
   const body = req.body;
-  userDb.getById(id)
+  postDb.insert({...body, user_id: id})
   .then(data => {
-    postDb.insert(body)
-    .then(hubs => {
-      res.status(201).json(hubs)
-    })
+    res.status(201).json(data)
   })
   .catch(error => {
     console.log(error)
-    res.status(500).json({errorMessage: "something went wrong!", error})
+    res.status(500).json({message: "Error saving a new post."})
   })
 });
 
@@ -64,7 +62,7 @@ router.get('/:id', validateUserId, (req, res) => {
 router.get('/:id/posts', validateUserId, (req, res) => {
   // do your magic!
   const id = req.params.id;
-  userDb.getById(id)
+  userDb.getUserPosts(id)
   .then(data => {
     res.status(200).json(data)
   })
@@ -75,11 +73,20 @@ router.get('/:id/posts', validateUserId, (req, res) => {
 });
 
 // DELETE requests
-router.delete('/:id', (req, res) => {
+router.delete('/:id', validateUserId, (req, res) => {
   // do your magic!
+  const id = req.params.id;
+  userDb.remove(id)
+  .then(deleted => {
+    res.status(200).json({message: "user has successfully been deleted", deleted})
+  })
+  .catch(error => {
+    console.log(error)
+    res.status(500).json({message: "error removing user", error})
+  })
 });
 
-// PUL requests
+// PUT requests
 router.put('/:id', (req, res) => {
   // do your magic!
 });
